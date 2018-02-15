@@ -79,7 +79,6 @@ cd "$PROJECT_PATH/$PROJECT_FOLDER/$PROJECT_SUBDIR" || exitWithMsg "Can't cd to $
 runCmdAsDockerUser "PATH=$PATH snyk $SNYK_COMMAND $SNYK_PARAMS $ADDITIONAL_ENV > $OUTPUT_FILE 2>$ERROR_FILE"
 
 RC=$?
-echo "first"
 
 if [ "$RC" -ne "0" ] && [ "$RC" -ne "1" ]; then
   exitWithMsg "$OUTPUT_FILE" "$RC"
@@ -98,9 +97,8 @@ if [ ! -z "$MONITOR" ]; then
   runCmdAsDockerUser "PATH=$PATH snyk monitor --json $SNYK_PARAMS -- $ADDITIONAL_ENV | jq -r \".uri\" | awk '{print \"<center><a target=\\\"_blank\\\" href=\\\"\" \$0 \"\\\">View On Snyk.io</a></center>\"}' > $PROJECT_PATH/$PROJECT_FOLDER/$HTML_FILE 2>$ERROR_FILE"
 fi
 
-echo "one "
 runCmdAsDockerUser "cat $OUTPUT_FILE | jq '.vulnerabilities|= map(. + {severity_numeric: (if(.severity) == \"high\" then 1 else (if(.severity) == \"medium\" then 2 else (if(.severity) == \"low\" then 3 else 4 end) end) end)}) |.vulnerabilities |= sort_by(.severity_numeric) | del(.vulnerabilities[].severity_numeric)' | snyk-to-html | sed 's/<\/head>/  <link rel=\"stylesheet\" href=\"snyk_report.css\"><\/head>/' >> $PROJECT_PATH/$PROJECT_FOLDER/$HTML_FILE"
-echo "two "
+
 runCmdAsDockerUser "cat /home/node/snyk_report.css > $PROJECT_PATH/$PROJECT_FOLDER/snyk_report.css"
 # fi
 #
